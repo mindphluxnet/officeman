@@ -59,9 +59,7 @@ def show_calendar():
         delta = datum - today
         if(delta.days < 0):
             termin['farbe'] = "danger"
-        elif(delta.days > 0 and delta.days < 10):
-            termin['farbe'] = "danger"
-        elif(delta.days > 0 and delta.days < 30):
+        elif(delta.days < 30 and delta.days > 15):
             termin['farbe'] = "warning"
 
         datum = timestring.Date(termin['ablaufdatum']).date
@@ -69,10 +67,8 @@ def show_calendar():
         delta = datum - today
         if(delta.days < 0):
             termin['farbe2'] = "danger"
-        elif(delta.days > 0 and delta.days < 10):
-            termin['farbe2'] = "danger"
-        elif(delta.days > 0 and delta.days < 30):
-            termin['farbe2'] = "warning"        
+        elif(delta.days < 30 and delta.days > 15):
+            termin['farbe2'] = "warning"
 
     return render_template('calendar.html', termine = termine, klienten = klienten, terminarten = terminarten, page_title = page_title, page_id = page_id, version = version)
 
