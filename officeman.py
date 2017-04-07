@@ -13,6 +13,7 @@ from datetime import datetime
 from modules.db import DB
 from modules.clients import Clients
 from modules.termine import Termine
+from modules.documents import Documents
 
 debug = True
 bind_host = "0.0.0.0"
@@ -178,6 +179,22 @@ def clients_archive():
     result = clients.archive(dbfile, request.form['id'])
 
     return json.dumps(result)
+
+@app.route('/documents')
+def show_documents():
+
+    page_title = "Dokumentenverwaltung"
+    page_id = "documents"
+
+    documents = Documents()
+    clients = Clients()
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    dox = documents.getbydate(dbfile, today)
+    klienten = clients.get(dbfile)
+
+    return render_template('documents.html', dox = dox, klienten = klienten, page_id = page_id, page_title = page_title, version = version)
 
 if __name__ == '__main__':
 	app.run(debug = debug, host = bind_host, port = bind_port)

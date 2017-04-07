@@ -1,0 +1,86 @@
+{% include "header.html"%}
+
+{% include "nav.html" %}
+
+  <div class="container">
+
+    {% include "flashes.html" %}
+
+    <button class="btn btn-primary" id="import-document" data-toggle="modal" data-target="#modal-document-import" ><i class="fa fa-upload"></i> Dokument importieren</button>
+    <button class="btn btn-default" id="scan-document"><i class="fa fa-barcode"></i> Dokument scannen</button>
+
+    <div class="clearfix">&nbsp;</div>
+
+    <table class="table table-striped table-condensed">
+      <thead>
+        <th>Datum</th>
+        <th>Klient</th>
+        <th>Kategorie</th>
+        <th>Titel</th>
+        <th class="text-right">Optionen</th>
+      </thead>
+      <tbody>
+        {% for doc in dokumente %}
+        <tr>
+          <td>{{ doc['add_datum'] }}</td>
+          <td>{{ doc['nachname'], doc['vorname'] }}</td>
+          <td>{{ doc['kategorie'] }}</td>
+          <td>{{ doc['titel'] }}</td>
+          <td class="text-right"></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </div>
+
+  <form action="/documents/import" method="post" enctype="multipart/form-data">
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal-document-import">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title"><i class="fa fa-calendar"></i> Dokument importieren</h4>
+          </div>
+          <div class="modal-body">
+              <div class="form-group">
+                <label for="klient_id">Klient</label>
+                <select name="klient_id" class="form-control">
+                  {% for klient in klienten %}
+                    <option value="{{ klient['rowid'] }}">{{ klient['nachname'] }}, {{ klient['vorname'] }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="terminart">Kategorie</label>
+                <select name="kategorie" class="form-control">
+                  {% for kat in kategorien %}
+                    <option value="{{ kat['rowid'] }}">{{ kat['name'] }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="datum">Datum des Dokuments</label>
+                <input type="date" required="required" id="datum" name="datum" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label for="titel">Titel des Dokuments</label>
+                <input type="text" id="titel" name="titel" required="required" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label for="datei">Datei</label>
+                <input type="file" id="datei" name="datei" required="required" class="form-control" />
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Schlie&szlig;en</button>
+            <button type="submit" class="btn btn-primary">Dokument importieren</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+
+
+{% include "footer.html" %}

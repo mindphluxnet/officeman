@@ -32,6 +32,11 @@ class DB:
         except Exception:
             pass
 
+        try:
+            c.execute("CREATE TABLE dokumente (klient_id INT, kategorie INT, add_datum TEXT, datum TEXT, titel TEXT)")
+        except Exception:
+            pass
+
         conn.commit()
         conn.close()
 
