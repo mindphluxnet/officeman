@@ -4,14 +4,14 @@ from modules.db import DB
 class Clients:
 
     @staticmethod
-    def get(dbfile, order = 'nachname'):
+    def get(dbfile):
 
         db = DB()
 
         conn = db.connect(dbfile)
         c = conn.cursor()
 
-        c.execute("SELECT oid, * FROM klienten ORDER BY ? ASC", [ order ])
+        c.execute("SELECT oid, * FROM klienten ORDER BY nachname, vorname DESC")
         klienten = c.fetchall()
 
         db.disconnect(conn, False)
@@ -42,7 +42,7 @@ class Clients:
         conn = db.connect(dbfile)
         c = conn.cursor()
 
-        c.execute("INSERT INTO klienten (vorname, nachname, geburtsdatum, archiviert) VALUES (?, ? ,?)", [ klient['vorname'], klient['nachname'], klient['geburtsdatum'], 0 ])
+        c.execute("INSERT INTO klienten (vorname, nachname, geburtsdatum, archiviert) VALUES (?, ? ,?, ?)", [ klient['vorname'], klient['nachname'], klient['geburtsdatum'], 0 ])
         db.disconnect(conn, True)
 
     @staticmethod

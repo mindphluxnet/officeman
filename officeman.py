@@ -8,9 +8,11 @@ import webbrowser
 import pdfkit
 import os.path
 import timestring
+from datetime import datetime
 
 from modules.db import DB
 from modules.clients import Clients
+from modules.termine import Termine
 
 debug = True
 bind_host = "0.0.0.0"
@@ -40,7 +42,15 @@ def show_calendar():
     page_title = "Terminverwaltung"
     page_id = "calendar"
 
-    termine = []
+    tm = Termine()
+
+    termine = tm.get(dbfile)
+
+    for termin in termine:
+        datum = timestring.Date(termin['beginndatum']).date
+        termin['beginndatum'] = datetime.strftime(datum, '%d.%m.%Y')
+        datum = timestring.Date(termin['ablaufdatum']).date
+        termin['ablaufdatum'] = datetime.strftime(datum, '%d.%m.%Y')
 
     return render_template('calendar.html', termine = termine, page_title = page_title, page_id = page_id, version = version)
 
@@ -53,6 +63,10 @@ def show_clients():
     clients = Clients()
 
     klienten = clients.get(dbfile)
+
+    for klient in klienten:
+        datum = timestring.Date(klient['geburtsdatum']).date
+        klient['geburtsdatum'] = datetime.strftime(datum, '%d.%m.%Y')
 
     return render_template('clients.html', klienten = klienten, page_title = page_title, page_id = page_id, version = version)
 

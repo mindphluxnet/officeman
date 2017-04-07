@@ -6,6 +6,7 @@
 
       {% include "flashes.html" %}
 
+      <div class="clearfix">&nbsp;</div>
       <button class="btn btn-primary" data-toggle="modal" data-target="#modal-klient-neu"><i class="glyphicon glyphicon-plus"></i> Neuen Klienten anlegen</button>
 
       <div class="clearfix">&nbsp;</div>
@@ -13,16 +14,16 @@
         <thead>
           <th>Name, Vorname</th>
           <th>Geburtsdatum</th>
-          <th>Optionen</th>
+          <th class="text-right">Optionen</th>
         </thead>
         <tbody>
           {% for klient in klienten %}
             <tr{% if klient['archiviert'] == 1%} class="text-muted"{% endif %} data-id="{{ klient['rowid'] }}">
               <td>{{ klient['nachname'] }}, {{ klient['vorname'] }}</td>
               <td>{{ klient['geburtsdatum'] }}</td>
-              <td>
+              <td class="text-right">
                 <button class="btn btn-xs btn-primary editbutton" data-id="{{ klient['rowid'] }}"><i class="fa fa-edit"></i> Bearbeiten</button>
-                <button class="btn btn-xs {% if klient['archiviert'] == 1 %}btn-danger{% else %}btn-success{% endif %} archivebutton" data-id="{{ klient['rowid'] }}"><i class="fa fa-archive"></i> {% if klient['archiviert'] == 1 %}Una{% else %}A{% endif %}rchivieren</button>
+                <button class="btn btn-xs {% if klient['archiviert'] == 0 %}btn-danger{% else %}btn-success{% endif %} archivebutton" data-id="{{ klient['rowid'] }}"><i class="fa fa-archive"></i> {% if klient['archiviert'] == 1 %}Una{% else %}A{% endif %}rchivieren</button>
               </td>
           {% endfor %}
         </tbody>
@@ -118,6 +119,8 @@
       });
 
       $('.archivebutton').on('click', function() {
+
+        $(this).blur();
 
         var id = $(this).data('id');
 

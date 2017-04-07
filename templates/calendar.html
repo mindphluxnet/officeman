@@ -4,6 +4,9 @@
 
     <div class="container">
 
+      {% include "flashes.html" %}
+      <div class="clearfix">&nbsp;</div>
+
       <button class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> Neuen Termin eintragen</button>
 
       <div class="clearfix">&nbsp;</div>
@@ -23,7 +26,7 @@
               <td>{{ termin['nachname'] }}, {{ termin['vorname'] }}</td>
               <td>{{ termin['beginndatum'] }}</td>
               <td>{{ termin['ablaufdatum'] }}</td>
-              <td>{{ termin['kommentar'] }}</td>
+              <td>{% if termin['bearbeitungskommentar']|trim != '' %}<i class="fa fa-clock" data-id="{{ termin['rowid'] }}"></i> {% endif %}{{ termin['kommentar'] }}</td>
               <td>
 
               </td>
