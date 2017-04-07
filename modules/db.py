@@ -18,7 +18,7 @@ class DB:
         c = conn.cursor()
 
         try:
-            c.execute("CREATE TABLE termine (terminart INT, klient_id INT, beginndatum TEXT, ablaufdatum TEXT, kommentar TEXT, bearbeitungskommentar TEXT, archiviert INT(1))")
+            c.execute("CREATE TABLE termine (terminart INT, klient_id INT, beginndatum TEXT, ablaufdatum TEXT, kommentar TEXT, bearbeitungskommentar TEXT, erledigt INT(1), archiviert INT(1))")
         except Exception:
             pass
 
@@ -27,6 +27,10 @@ class DB:
         except Exception:
             pass
 
+        try:
+            c.execute("CREATE TABLE terminarten (name TEXT, icon TEXT, UNIQUE(name))")
+        except Exception:
+            pass
 
         conn.commit()
         conn.close()

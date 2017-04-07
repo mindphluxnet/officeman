@@ -24,8 +24,10 @@ app = Flask(__name__, static_url_path = '')
 app.secret_key = 'fgsdsdsdsdsrewfdd'
 
 db = DB()
+tm = Termine()
 
 db.setup(dbfile)
+tm.setup_terminarten(dbfile)
 
 @app.route('/assets/<path:path>')
 def serve_asset(path):
@@ -39,20 +41,90 @@ def show_index():
 @app.route('/calendar')
 def show_calendar():
 
-    page_title = "Terminverwaltung"
+    page_title = "Fristenverwaltung"
     page_id = "calendar"
 
     tm = Termine()
+    kl = Clients()
 
     termine = tm.get(dbfile)
+    klienten = kl.get(dbfile)
+    terminarten = tm.terminarten(dbfile)
+
+    today = datetime.now()
 
     for termin in termine:
         datum = timestring.Date(termin['beginndatum']).date
         termin['beginndatum'] = datetime.strftime(datum, '%d.%m.%Y')
+        delta = datum - today
+        if(delta.days < 0):
+            termin['farbe'] = "danger"
+        elif(delta.days > 0 and delta.days < 10):
+            termin['farbe'] = "danger"
+        elif(delta.days > 0 and delta.days < 30):
+            termin['farbe'] = "warning"
+
         datum = timestring.Date(termin['ablaufdatum']).date
         termin['ablaufdatum'] = datetime.strftime(datum, '%d.%m.%Y')
+        delta = datum - today
+        if(delta.days < 0):
+            termin['farbe2'] = "danger"
+        elif(delta.days > 0 and delta.days < 10):
+            termin['farbe2'] = "danger"
+        elif(delta.days > 0 and delta.days < 30):
+            termin['farbe2'] = "warning"        
 
-    return render_template('calendar.html', termine = termine, page_title = page_title, page_id = page_id, version = version)
+    return render_template('calendar.html', termine = termine, klienten = klienten, terminarten = terminarten, page_title = page_title, page_id = page_id, version = version)
+
+@app.route('/calendar/save', methods = ['POST'])
+def calendar_save():
+
+    tm = Termine()
+
+    tm.put(dbfile, request.form)
+
+    flash('Frist erfolgreich gespeichert', 'success')
+
+    return redirect(url_for('show_calendar'))
+
+@app.route('/calendar/update', methods = ['POST'])
+def calendar_update():
+
+    tm = Termine()
+
+    tm.update(dbfile, request.form)
+
+    flash('Frist erfolgreich aktualisiert', 'success')
+
+    return redirect(url_for('show_calendar'))
+
+@app.route('/calendar/getsingle', methods = ['POST'])
+def calendar_getsingle():
+
+    tm = Termine()
+
+    termin = tm.getsingle(dbfile, request.form['id'])
+
+    return json.dumps(termin)
+
+@app.route('/calendar/done', methods = ['POST'])
+def calendar_done():
+
+    tm = Termine()
+
+    tm.done(dbfile, request.form['id'])
+
+    return 'ok'
+
+@app.route('/calendar/archive', methods = ['POST'])
+def calendar_archive():
+
+    tm = Termine()
+
+    tm.archive(dbfile, request.form['id'])
+
+    return 'ok'
+
 
 @app.route('/clients')
 def show_clients():

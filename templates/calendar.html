@@ -7,29 +7,33 @@
       {% include "flashes.html" %}
       <div class="clearfix">&nbsp;</div>
 
-      <button class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> Neuen Termin eintragen</button>
+      <button class="btn btn-primary" data-toggle="modal" data-target="#modal-termin-neu"><i class="glyphicon glyphicon-plus"></i> Neue Frist eintragen</button>
 
       <div class="clearfix">&nbsp;</div>
-      <table class="table table-striped table-condensed">
+      <table class="table table-condensed">
         <thead>
           <th>Terminart</th>
           <th>Klient</th>
           <th>Terminbeginn</th>
           <th>Terminablauf</th>
           <th>Kommentar</th>
-          <th>Optionen</th>
+          <th class="text-right">Optionen</th>
         </thead>
         <tbody>
           {% for termin in termine %}
-            <tr>
-              <td><i class="fa fa-{{ termin['terminart-icon'] }}"></i> {{ terminart }}</td>
+          {% if termin['erledigt'] == 0 and termin['archiviert'] == 0 and termin['klient_archiviert'] == 0 %}
+            <tr data-id="{{ termin['rowid'] }}">
+              <td><i class="fa fa-{{ termin['icon'] }}"></i> {{ termin['name'] }}</td>
               <td>{{ termin['nachname'] }}, {{ termin['vorname'] }}</td>
-              <td>{{ termin['beginndatum'] }}</td>
-              <td>{{ termin['ablaufdatum'] }}</td>
-              <td>{% if termin['bearbeitungskommentar']|trim != '' %}<i class="fa fa-clock" data-id="{{ termin['rowid'] }}"></i> {% endif %}{{ termin['kommentar'] }}</td>
-              <td>
-
+              <td>{% if termin['farbe']|trim != '' and termin['farbe'] != None %}<span class="text-{{ termin['farbe'] }}">{% endif %}{{ termin['beginndatum'] }}{% if termin['farbe']|trim != '' and termin['farbe'] != None %}</span>{% endif %}</td>
+              <td>{% if termin['farbe2']|trim != '' and termin['farbe2'] != None %}<span class="text-{{ termin['farbe2'] }}">{% endif %}{{ termin['ablaufdatum'] }}{% if termin['farbe2']|trim != '' and termin['farbe2'] != None %}</span>{% endif %}</td>
+              <td>{% if termin['bearbeitungskommentar']|trim != '' %}<i class="fa fa-clock-o" data-id="{{ termin['rowid'] }}" data-toggle="popover" data-placement="top" title="Status" data-content="{{ termin['bearbeitungskommentar'] }}"></i> {% endif %}{{ termin['kommentar']|truncate(60) }}</td>
+              <td class="text-right">
+                <button class="btn btn-default btn-xs terminbearbeiten" data-id="{{ termin['rowid'] }}"><i class="fa fa-edit"></i></button>
+                <button class="btn btn-success btn-xs terminerledigt" data-id="{{ termin['rowid'] }}"><i class="fa fa-check-circle"></i></button>
+                <button class="btn btn-danger btn-xs terminarchivieren" data-id="{{ termin['rowid'] }}"><i class="fa fa-times-circle"></i></button>
               </td>
+          {% endif %}
           {% endfor %}
         </tbody>
 
@@ -37,5 +41,173 @@
 
     </div>
 
+    <form action="/calendar/save" method="post">
+      <div class="modal fade" tabindex="-1" role="dialog" id="modal-termin-neu">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title"><i class="fa fa-calendar"></i> Neue Frist</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                  <label for="klient_id">Klient</label>
+                  <select name="klient_id" class="form-control">
+                    {% for klient in klienten %}
+                      <option value="{{ klient['rowid'] }}">{{ klient['nachname'] }}, {{ klient['vorname'] }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="terminart">Art des Termins</label>
+                  <select name="terminart" class="form-control">
+                    {% for ta in terminarten %}
+                      <option value="{{ ta['rowid'] }}">{{ ta['name'] }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="beginndatum">Fristbeginn</label>
+                  <input type="date" required="required" id="beginndatum" name="beginndatum" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label for="ablaufdatum">Fristende</label>
+                  <input type="date" required="required" id="ablaufdatum" name="ablaufdatum" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label for="kommentar">Kommentar</label>
+                  <input type="text" id="kommentar" name="kommentar" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label for="bearbeitungskommentar">Bearbeitungsstatus</label>
+                  <input type="text" id="bearbeitungskommentar" name="bearbeitungskommentar" class="form-control" />
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Schlie&szlig;en</button>
+              <button type="submit" class="btn btn-primary">Speichern</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <form action="/calendar/update" method="post">
+      <div class="modal fade" tabindex="-1" role="dialog" id="modal-termin-bearbeiten">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title"><i class="fa fa-calendar"></i> Frist bearbeiten</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                  <label for="klient_id">Klient</label>
+                  <select name="klient_id" class="form-control" id="edit-klient_id">
+                    {% for klient in klienten %}
+                      <option value="{{ klient['rowid'] }}">{{ klient['nachname'] }}, {{ klient['vorname'] }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="terminart">Art des Termins</label>
+                  <select name="terminart" class="form-control" id="edit-terminart">
+                    {% for ta in terminarten %}
+                      <option value="{{ ta['rowid'] }}">{{ ta['name'] }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="beginndatum">Fristbeginn</label>
+                  <input type="date" required="required" id="edit-beginndatum" name="beginndatum" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label for="ablaufdatum">Fristende</label>
+                  <input type="date" required="required" id="edit-ablaufdatum" name="ablaufdatum" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label for="kommentar">Kommentar</label>
+                  <input type="text" id="edit-kommentar" name="kommentar" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label for="bearbeitungskommentar">Bearbeitungsstatus</label>
+                  <input type="text" id="edit-bearbeitungskommentar" name="bearbeitungskommentar" class="form-control" />
+                </div>
+            </div>
+            <input type="hidden" name="id" id="edit-id" value="" />
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Schlie&szlig;en</button>
+              <button type="submit" class="btn btn-primary">Speichern</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <script type="text/javascript">
+
+      $('.terminbearbeiten').on('click', function() {
+
+        var id = $(this).data('id');
+
+        $.ajax({
+          url: '/calendar/getsingle',
+          method: 'POST',
+          data: { 'id': id },
+          success: function(result) {
+            result = JSON.parse(result);
+            $('#edit-klient_id').val(result.klient_id);
+            $('#edit-terminart').val(result.terminart);
+            $('#edit-beginndatum').val(result.beginndatum);
+            $('#edit-ablaufdatum').val(result.ablaufdatum);
+            $('#edit-kommentar').val(result.kommentar);
+            $('#edit-bearbeitungskommentar').val(result.bearbeitungskommentar);
+            $('#edit-id').val(result.rowid);
+            $('#modal-termin-bearbeiten').modal();
+
+          }
+
+        });
+
+      });
+
+      $('.terminerledigt').on('click', function() {
+
+        var id = $(this).data('id');
+
+        $.ajax({
+          url: '/calendar/done',
+          method: 'POST',
+          data: { 'id': id },
+          success: function() {
+            $('tr[data-id="' + id +'"]').remove();
+          }
+
+        });
+
+      });
+
+      $('.terminarchivieren').on('click', function() {
+
+        var id = $(this).data('id');
+
+        $.ajax({
+          url: '/calendar/archive',
+          method: 'POST',
+          data: { 'id': id },
+          success: function() {
+            $('tr[data-id="' + id +'"]').remove();
+          }
+
+        });
+
+      });
+
+      $(function () {
+        $('[data-toggle="popover"]').popover()
+      })
+
+
+    </script>
 
 {% include "footer.html" %}
