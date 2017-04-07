@@ -3,6 +3,7 @@ import sqlite3
 class DB:
 
     #: from http://stackoverflow.com/questions/811548/sqlite-and-python-return-a-dictionary-using-fetchone
+    @staticmethod
     def dict_factory(cursor, row):
         d = {}
         for idx,col in enumerate(cursor.description):
@@ -31,11 +32,10 @@ class DB:
         conn.close()
 
     @staticmethod
-    def connect(dbfile, with_factory = False):
+    def connect(dbfile):
 
         conn = sqlite3.connect(dbfile)
-        if(with_factory):
-            conn.row_factory = dict_factory
+        conn.row_factory = DB.dict_factory
 
         return conn
 

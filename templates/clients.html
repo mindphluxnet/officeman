@@ -4,7 +4,9 @@
 
     <div class="container">
 
-      <button class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> Neuen Klienten anlegen</button>
+      {% include "flashes.html" %}
+
+      <button class="btn btn-primary" data-toggle="modal" data-target="#modal-klient-neu"><i class="glyphicon glyphicon-plus"></i> Neuen Klienten anlegen</button>
 
       <div class="clearfix">&nbsp;</div>
       <table class="table table-striped table-condensed">
@@ -15,10 +17,12 @@
         </thead>
         <tbody>
           {% for klient in klienten %}
-            <tr{% if klient['archiviert'] == 1%} class="text-muted"{% endif %}>
+            <tr{% if klient['archiviert'] == 1%} class="text-muted"{% endif %} data-id="{{ klient['rowid'] }}">
               <td>{{ klient['nachname'] }}, {{ klient['vorname'] }}</td>
               <td>{{ klient['geburtsdatum'] }}</td>
               <td>
+                <button class="btn btn-xs btn-primary editbutton" data-id="{{ klient['rowid'] }}"><i class="fa fa-edit"></i> Bearbeiten</button>
+                <button class="btn btn-xs {% if klient['archiviert'] == 1 %}btn-danger{% else %}btn-success{% endif %} archivebutton" data-id="{{ klient['rowid'] }}"><i class="fa fa-archive"></i> {% if klient['archiviert'] == 1 %}Una{% else %}A{% endif %}rchivieren</button>
               </td>
           {% endfor %}
         </tbody>
@@ -27,5 +31,118 @@
 
     </div>
 
+    <form action="/clients/save" method="post">
+      <div class="modal fade" tabindex="-1" role="dialog" id="modal-klient-neu">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title"><i class="fa fa-user"></i> Neuer Klient</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                  <label for="nachname">Nachname</label>
+                  <input type="text" required="required" id="nachname" name="nachname" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label for="vorname">Vorname</label>
+                  <input type="text" required="required" id="vorname" name="vorname" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label for="geburtsdatum">Geburtsdatum</label>
+                  <input type="date" required="required" id="geburtsdatum" name="geburtsdatum" class="form-control" />
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Schlie&szlig;en</button>
+              <button type="submit" class="btn btn-primary">Speichern</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <form action="/clients/update" method="post" id="clients-update-form">
+      <div class="modal fade" tabindex="-1" role="dialog" id="modal-klient-bearbeiten">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title"><i class="fa fa-user"></i> Klient bearbeiten</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                  <label for="nachname">Nachname</label>
+                  <input type="text" required="required" id="edit-nachname" name="nachname" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label for="vorname">Vorname</label>
+                  <input type="text" required="required" id="edit-vorname" name="vorname" class="form-control" />
+                </div>
+                <div class="form-group">
+                  <label for="geburtsdatum">Geburtsdatum</label>
+                  <input type="date" required="required" id="edit-geburtsdatum" name="geburtsdatum" class="form-control" />
+                </div>
+                <input type="hidden" name="id" id="edit-id" value="" />
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Schlie&szlig;en</button>
+              <button type="submit" class="btn btn-primary">Speichern</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+
+    <script type="text/javascript">
+
+      $('.editbutton').on('click', function() {
+
+        var id = $(this).data('id');
+        $.ajax({
+          url: '/clients/getsingle',
+          method: 'POST',
+          data: { 'id': id },
+          success: function(result) {
+            result = JSON.parse(result);
+            $('#edit-vorname').val(result.vorname);
+            $('#edit-nachname').val(result.nachname);
+            $('#edit-geburtsdatum').val(result.geburtsdatum);
+            $('#edit-id').val(result.rowid);
+            $('#modal-klient-bearbeiten').modal();
+          }
+
+        });
+
+      });
+
+      $('.archivebutton').on('click', function() {
+
+        var id = $(this).data('id');
+
+        $.ajax({
+          url: '/clients/archive',
+          method: 'POST',
+          data: { 'id': id },
+          success: function(result) {
+            result = JSON.parse(result);
+            if(result.archiviert == 1) {
+              $('tr[data-id="' + result.rowid +'"]').addClass('text-muted');
+              $('.archivebutton[data-id="' + result.rowid + '"]').removeClass('btn-danger').addClass('btn-success').html('<i class="fa fa-archive"></i> Unarchivieren');
+            }
+            else
+            {
+              $('tr[data-id="' + result.rowid +'"]').removeClass('text-muted');
+              $('.archivebutton[data-id="' + result.rowid + '"]').removeClass('btn-success').addClass('btn-danger').html('<i class="fa fa-archive"></i> Archivieren');
+            }
+
+          }
+
+        });
+
+      });
+
+    </script>
 
 {% include "footer.html" %}
