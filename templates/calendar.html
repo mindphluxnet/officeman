@@ -1,0 +1,38 @@
+{% include "header.html"%}
+
+{% include "nav.html" %}
+
+    <div class="container">
+
+      <button class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> Neuen Termin eintragen</button>
+
+      <div class="clearfix">&nbsp;</div>
+      <table class="table table-striped table-condensed">
+        <thead>
+          <th>Terminart</th>
+          <th>Klient</th>
+          <th>Terminbeginn</th>
+          <th>Terminablauf</th>
+          <th>Kommentar</th>
+          <th>Optionen</th>
+        </thead>
+        <tbody>
+          {% for termin in termine %}
+            <tr>
+              <td><i class="fa fa-{{ termin['terminart-icon'] }}"></i> {{ terminart }}</td>
+              <td>{{ termin['nachname'] }}, {{ termin['vorname'] }}</td>
+              <td>{{ termin['beginndatum'] }}</td>
+              <td>{{ termin['ablaufdatum'] }}</td>
+              <td>{{ termin['kommentar'] }}</td>
+              <td>
+
+              </td>
+          {% endfor %}
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+{% include "footer.html" %}
