@@ -33,7 +33,12 @@ class DB:
             pass
 
         try:
-            c.execute("CREATE TABLE dokumente (klient_id INT, kategorie INT, add_datum TEXT, datum TEXT, titel TEXT)")
+            c.execute("CREATE TABLE dokumente (klient_id INT, absender TEXT, kategorie INT, add_datum TEXT, datum TEXT, titel TEXT)")
+        except Exception:
+            pass
+
+        try:
+            c.execute("CREATE TABLE kategorien (name TEXT, UNIQUE(name))")
         except Exception:
             pass
 

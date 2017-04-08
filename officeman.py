@@ -26,9 +26,11 @@ app.secret_key = 'fgsdsdsdsdsrewfdd'
 
 db = DB()
 tm = Termine()
+doc = Documents()
 
 db.setup(dbfile)
 tm.setup_terminarten(dbfile)
+doc.setup_categories(dbfile)
 
 @app.route('/assets/<path:path>')
 def serve_asset(path):
@@ -193,8 +195,9 @@ def show_documents():
 
     dox = documents.getbydate(dbfile, today)
     klienten = clients.get(dbfile)
+    kategorien = documents.categories(dbfile)
 
-    return render_template('documents.html', dox = dox, klienten = klienten, page_id = page_id, page_title = page_title, version = version)
+    return render_template('documents.html', dox = dox, kategorien = kategorien, klienten = klienten, page_id = page_id, page_title = page_title, version = version)
 
 if __name__ == '__main__':
 	app.run(debug = debug, host = bind_host, port = bind_port)
